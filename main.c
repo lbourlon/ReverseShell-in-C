@@ -79,27 +79,27 @@ void client_shell(int client_fd){
 
     /* This works because the parent and fork share stdin & stdout */
     /* So one handles the read and the other the write & shuting */ 
+    int eof_check = 1;
 
-    if(reader == 0){ // Read Fork 
+    if(reader == 0){ // Read Fork, handles output 
         signal(SIGINT, intHandler);
         while(runVar) {
             /* Read response */
             memset(buf, 0, BUFFSIZE);
             error = read(client_fd, buf, BUFFSIZE);
             check(error, "Could not read");
-
             printf("%s", buf);
         }
         shutdown(client_fd, SHUT_RD);
-    } else { // Parent node forks again
+    } else { // Parent node forks handles input
 
-        signal(SIGINT, intHandler); // catch SIGINT to send it to 
-        while(runVar){
-            /* If there something to send do that instead */
-            memset(buf, 0, BUFFSIZE);
-            fgets(buf, BUFFSIZE, stdin);
+        memset(buf, 0, BUFFSIZE);
+
+        signal(SIGINT, intHandler);
+        while(fgets(buf, BUFFSIZE, stdin) != NULL){
             error = write(client_fd, buf, strlen(buf));
             check(error, "Could not write");
+            memset(buf, 0, BUFFSIZE);
         }
         
         kill(reader, SIGINT);
@@ -161,18 +161,6 @@ void serverInit_shell(int port){
 }
 
 
-void process_conn(int sock) {
-    int error;
-    char buf[BUFFSIZE];
-    memset(buf, 0, BUFFSIZE);
-
-    error = read(sock, buf, BUFFSIZE - 1);
-    check(error, "Could not read from socket"); 
-
-    printf("%s",buf);
-    error = write(sock,"ACK",4);
-    check(error, "Could not write to socket"); 
-}
 
 void serverInit_oritinal(int port){
     printf("Starting Server on port : %d\n", port);
