@@ -1,6 +1,6 @@
 # C-Sockets
 
-This repo is for me to learn about sockets, forks, file descriptors, etc.
+This repo is for me to learn about sockets, forks, file descriptors and signals.
 
 The idea is to have a reverse shell client/server/proxy on a single file.
 
@@ -11,4 +11,5 @@ Command:
     help
     listen  <port>
     connect <address> <port> 
-    proxy   <listen_port> <target_address> <target_port>```
+    proxy   <listen_port> <target_address> <target_port>
+```

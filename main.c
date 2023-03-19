@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/wait.h> // waitpid
+#include <termios.h> // nice client
 
 // Size of incomming / outgoing buffer
 #define BUFFSIZE 1024 
@@ -17,8 +18,13 @@
 // https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm#
 
 static volatile int runVar = 1;
-void intHandler(int var){
-    runVar = 0;
+volatile sig_atomic_t runSig = 1;
+void intHandler(int sig){
+    if(sig == SIGINT){
+        runVar = 0;
+        runSig = 0;
+    }
+    printf("Handling my business :)");
 }
 
 int atop(char* port){
@@ -95,7 +101,8 @@ void client_shell(int client_fd){
 
         memset(buf, 0, BUFFSIZE);
 
-        signal(SIGINT, intHandler);
+        // signal(SIGINT, intHandler);
+        // signal(SIGINT, );
         while(fgets(buf, BUFFSIZE, stdin) != NULL){
             error = write(client_fd, buf, strlen(buf));
             check(error, "Could not write");
@@ -133,7 +140,15 @@ void serverInit_shell(int port){
     listen(server_fd, backlog);
     int client_len = sizeof(client);
 
-    while (1){
+    struct sigaction act = {
+        .sa_handler = intHandler,
+        .sa_flags = 0,
+    };
+    // sigfillset( &act.sa_mask ); 
+
+    // signal(SIGINT, intHandler);
+    sigaction( SIGINT, &act, NULL);
+    while (runSig || runVar){
         client_fd = accept(server_fd, (struct sockaddr*) &client, &client_len);
 
         check(client_fd, "Could not accept connection");
@@ -147,9 +162,10 @@ void serverInit_shell(int port){
         if(pid == 0) { // Handle the connection
             dup2(client_fd, 0); // forked stdin is redirected to client_fd
             dup2(client_fd, 1); // forked stdout is redirected to client_fd
+            dup2(1, 2); // forked stderr is redirected to stdout
 
-            close(server_fd);
-            close(client_fd);   // Closes child client socket fd before exec
+            // close(client_fd);   // Closes child client socket fd before exec
+            close(server_fd);   // 
 
             char* arguments[5] = {"bash",  "--rcfile", "~/.bashrc", "-s", NULL};
             execvp(arguments[0], arguments);
@@ -157,7 +173,9 @@ void serverInit_shell(int port){
             close(client_fd); // Closes parent child socket
         }
     }
-    shutdown(server_fd, SHUT_RD);
+    printf("Is this being executed ? \n");
+    shutdown(client_fd, SHUT_RD);
+    close(server_fd);
 }
 
 
