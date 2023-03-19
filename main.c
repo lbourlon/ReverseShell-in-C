@@ -34,8 +34,12 @@ void check(int var, char* msg){
 }
 
 void print_usage(){
-    printf("Usage : program | listen  <port>\n");
-    printf("                | connect <address> <port>\n");
+    printf("Usage: main [command]\n");
+    printf("Command:\n");
+    printf("    help\n");
+    printf("    listen  <port>\n");
+    printf("    connect <address> <port> \n");
+    printf("    proxy   <listen_port> <target_address> <target_port>\n");
 }
 
 int clientInit(int port, const char* host_str){
