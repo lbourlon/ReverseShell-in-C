@@ -9,10 +9,9 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/wait.h> // waitpid
-#include <termios.h> // nice client
 
 // Size of incomming / outgoing buffer
-#define BUFFSIZE 1024 
+#define BUFFSIZE 1024
 
 // https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm
 // https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm#
@@ -223,7 +222,9 @@ void serverInit_oritinal(int port){
     close(server_fd);
 }
 
-
+/* Here's some documentation for this funciton.
+ *
+ */
 void proxy(int listen_port,  const char* host_str, int target_port){
     printf("Listening on %d sending to %s:%d\n", listen_port, host_str, target_port);
     int server_fd, client_fd, error;
