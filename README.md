@@ -1,8 +1,9 @@
-# C-Sockets
+# ReverseShell-in-C
+
+Simple reverse shell with client/server/proxy on a single file.
 
 This repo is for me to learn about sockets, forks, file descriptors and signals.
 
-The idea is to have a reverse shell client/server/proxy on a single file.
 
 # Usage:
 ```
